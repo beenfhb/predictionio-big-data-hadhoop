@@ -41,15 +41,9 @@ import org.json4s.native.JsonMethods._
 import org.json4s.ext.JodaTimeSerializers
 
 
-class ESPEvents(client: RestClient, config: StorageClientConfig, index: String)
+class ESPEvents(client: ESClient, config: StorageClientConfig, index: String)
     extends PEvents {
   implicit val formats = DefaultFormats.lossless ++ JodaTimeSerializers.all
-
-  // client is not used.
-  try client.close() catch {
-    case e: Exception =>
-      logger.error("Failed to close client.", e)
-  }
 
   def getEsType(appId: Int, channelId: Option[Int] = None): String = {
     channelId.map { ch =>
@@ -114,7 +108,7 @@ class ESPEvents(client: RestClient, config: StorageClientConfig, index: String)
     eventIds: RDD[String],
     appId: Int, channelId: Option[Int])(sc: SparkContext): Unit = {
     val estype = getEsType(appId, channelId)
-    val restClient = ESUtils.createRestClient(config)
+    val restClient = client.open()
     try {
       eventIds.foreachPartition { iter =>
         iter.foreach { eventId =>
@@ -124,7 +118,7 @@ class ESPEvents(client: RestClient, config: StorageClientConfig, index: String)
                 ("term" ->
                   ("eventId" -> eventId)))
             val entity = new NStringEntity(compact(render(json)), ContentType.APPLICATION_JSON)
-            val response = client.performRequest(
+            val response = restClient.performRequest(
               "POST",
               s"/$index/$estype/_delete_by_query",
               Map.empty[String, String].asJava)

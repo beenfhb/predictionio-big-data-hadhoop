@@ -17,22 +17,28 @@
 
 package org.apache.predictionio.data.storage.elasticsearch
 
-import grizzled.slf4j.Logging
+import org.apache.http.HttpHost
 import org.apache.predictionio.data.storage.BaseStorageClient
 import org.apache.predictionio.data.storage.StorageClientConfig
 import org.apache.predictionio.data.storage.StorageClientException
-import java.net.InetAddress
 import org.elasticsearch.client.RestClient
-import org.apache.http.HttpHost
+
+import grizzled.slf4j.Logging
+
+case class ESClient(hosts: Seq[HttpHost]) {
+  def open(): RestClient = {
+    try {
+      RestClient.builder(hosts: _*).build()
+    } catch {
+      case e: Throwable =>
+        throw new StorageClientException(e.getMessage, e)
+    }
+  }
+}
 
 class StorageClient(val config: StorageClientConfig) extends BaseStorageClient
     with Logging {
   override val prefix = "ES"
 
-  val client = try {
-    ESUtils.createRestClient(config)
-  } catch {
-    case e: Throwable =>
-      throw new StorageClientException(e.getMessage, e)
-  }
+  val client = ESClient(ESUtils.getHttpHosts(config))
 }

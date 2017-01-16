@@ -35,20 +35,26 @@ import org.json4s.native.Serialization.write
 
 import grizzled.slf4j.Logging
 
-class ESSequences(client: RestClient, config: StorageClientConfig, index: String) extends Logging {
+class ESSequences(client: ESClient, config: StorageClientConfig, index: String) extends Logging {
   implicit val formats = DefaultFormats
   private val estype = "sequences"
 
-  ESUtils.createIndex(client, index)
-  val mappingJson =
-    (estype ->
-      ("_all" -> ("enabled" -> 0)))
-  ESUtils.createMapping(client, index, estype, compact(render(mappingJson)))
+  val restClient = client.open()
+  try {
+    ESUtils.createIndex(restClient, index)
+    val mappingJson =
+      (estype ->
+        ("_all" -> ("enabled" -> 0)))
+    ESUtils.createMapping(restClient, index, estype, compact(render(mappingJson)))
+  } finally {
+    restClient.close()
+  }
 
   def genNext(name: String): Int = {
+    val restClient = client.open()
     try {
       val entity = new NStringEntity(write("n" -> name), ContentType.APPLICATION_JSON)
-      val response = client.performRequest(
+      val response = restClient.performRequest(
         "POST",
         s"/$index/$estype/$name",
         Map.empty[String, String].asJava,
@@ -66,6 +72,8 @@ class ESSequences(client: RestClient, config: StorageClientConfig, index: String
     } catch {
       case e: IOException =>
         throw new StorageClientException(s"Failed to update $index/$estype/$name", e)
+    } finally {
+      restClient.close()
     }
   }
 }

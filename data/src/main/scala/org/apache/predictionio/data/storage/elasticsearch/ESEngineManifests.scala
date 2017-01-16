@@ -37,7 +37,7 @@ import org.json4s.native.Serialization.write
 import grizzled.slf4j.Logging
 import org.elasticsearch.client.ResponseException
 
-class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: String)
+class ESEngineManifests(client: ESClient, config: StorageClientConfig, index: String)
     extends EngineManifests with Logging {
   implicit val formats = DefaultFormats + new EngineManifestSerializer
   private val estype = "engine_manifests"
@@ -45,9 +45,10 @@ class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: 
 
   def insert(engineManifest: EngineManifest): Unit = {
     val id = esid(engineManifest.id, engineManifest.version)
+    val restClient = client.open()
     try {
       val entity = new NStringEntity(write(engineManifest), ContentType.APPLICATION_JSON)
-      val response = client.performRequest(
+      val response = restClient.performRequest(
         "POST",
         s"/$index/$estype/$id",
         Map.empty[String, String].asJava,
@@ -63,13 +64,16 @@ class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: 
     } catch {
       case e: IOException =>
         error(s"Failed to update $index/$estype/$id", e)
+    } finally {
+      restClient.close()
     }
   }
 
   def get(id: String, version: String): Option[EngineManifest] = {
     val esId = esid(id, version)
+    val restClient = client.open()
     try {
-      val response = client.performRequest(
+      val response = restClient.performRequest(
         "GET",
         s"/$index/$estype/$esId",
         Map.empty[String, String].asJava)
@@ -91,20 +95,24 @@ class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: 
       case e: IOException =>
         error(s"Failed to access to /$index/$estype/$esId", e)
         None
+    } finally {
+      restClient.close()
     }
-
   }
 
   def getAll(): Seq[EngineManifest] = {
+    val restClient = client.open()
     try {
       val json =
         ("query" ->
           ("match_all" ->  List.empty))
-      ESUtils.getAll[EngineManifest](client, index, estype, compact(render(json)))
+      ESUtils.getAll[EngineManifest](restClient, index, estype, compact(render(json)))
     } catch {
       case e: IOException =>
         error("Failed to access to /$index/$estype/_search", e)
         Nil
+    } finally {
+      restClient.close()
     }
   }
 
@@ -113,8 +121,9 @@ class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: 
 
   def delete(id: String, version: String): Unit = {
     val esId = esid(id, version)
+    val restClient = client.open()
     try {
-      val response = client.performRequest(
+      val response = restClient.performRequest(
         "DELETE",
         s"/$index/$estype/$esId",
         Map.empty[String, String].asJava)
@@ -128,6 +137,8 @@ class ESEngineManifests(client: RestClient, config: StorageClientConfig, index: 
     } catch {
       case e: IOException =>
         error(s"Failed to update $index/$estype/$esId", e)
+    } finally {
+      restClient.close()
     }
   }
 }

@@ -151,15 +151,13 @@ object ESUtils {
        |}""".stripMargin
   }
 
-  def createRestClient(config: StorageClientConfig): RestClient = {
+  def getHttpHosts(config: StorageClientConfig): Seq[HttpHost] = {
     val hosts = config.properties.get("HOSTS").
       map(_.split(",").toSeq).getOrElse(Seq("localhost"))
     val ports = config.properties.get("PORTS").
       map(_.split(",").toSeq.map(_.toInt)).getOrElse(Seq(9200))
     val schemes = config.properties.get("SCHEMES").
       map(_.split(",").toSeq).getOrElse(Seq("http"))
-    val httpHosts = (hosts, ports, schemes).zipped.map(
-      (h, p, s) => new HttpHost(h, p, s))
-    RestClient.builder(httpHosts: _*).build()
+    (hosts, ports, schemes).zipped.map((h, p, s) => new HttpHost(h, p, s))
   }
 }
