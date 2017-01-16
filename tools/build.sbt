@@ -42,6 +42,7 @@ dependencyOverrides +=   "org.slf4j" % "slf4j-log4j12" % "1.7.18"
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", "LICENSE.txt") => MergeStrategy.concat
   case PathList("META-INF", "NOTICE.txt")  => MergeStrategy.concat
+  case PathList("org", "joda", "time", "base", "BaseDateTime.class") => MergeStrategy.first
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
@@ -62,7 +63,8 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 assemblyShadeRules in assembly := Seq(
   ShadeRule.rename("org.objenesis.**" -> "shadeio.@1").inLibrary("com.esotericsoftware.kryo" % "kryo" % "2.21").inProject,
   ShadeRule.rename("com.esotericsoftware.reflectasm.**" -> "shadeio.@1").inLibrary("com.esotericsoftware.kryo" % "kryo" % "2.21").inProject,
-  ShadeRule.rename("com.esotericsoftware.minlog.**" -> "shadeio.@1").inLibrary("com.esotericsoftware.kryo" % "kryo" % "2.21").inProject
+  ShadeRule.rename("com.esotericsoftware.minlog.**" -> "shadeio.@1").inLibrary("com.esotericsoftware.kryo" % "kryo" % "2.21").inProject,
+  ShadeRule.rename("org.apache.http.**" -> "shadeio.http.@1").inAll
 )
 
 // skip test in assembly
