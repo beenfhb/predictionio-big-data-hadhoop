@@ -15,23 +15,11 @@
  * limitations under the License.
  */
 
-import sbt._
-import Keys._
 
-object PIOBuild extends Build {
-  val elasticsearchVersion = SettingKey[String](
-    "elasticsearch-version",
-    "The version of Elasticsearch used for building.")
-  val elasticsearch1Version = SettingKey[String](
-    "elasticsearch1-version",
-    "The version of Elasticsearch 1.x used for building.")
-  val json4sVersion = SettingKey[String](
-    "json4s-version",
-    "The version of JSON4S used for building.")
-  val sparkVersion = SettingKey[String](
-    "spark-version",
-    "The version of Apache Spark used for building.")
-  val childrenPomExtra = SettingKey[scala.xml.NodeSeq](
-    "children-pom-extra",
-    "Extra POM data for children projects.")
-}
+package org.apache.predictionio.data.storage
+
+/** Elasticsearch implementation of storage traits, supporting meta data only
+  *
+  * @group Implementation
+  */
+package object elasticsearch1 {}
