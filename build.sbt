@@ -18,7 +18,7 @@
 import PIOBuild._
 import UnidocKeys._
 
-lazy val scalaSparkDependenciesVersion = Map(
+lazy val scalaSparkDepsVersion = Map(
   "2.10" -> Map(
     "1.6" -> Map(
       "akka" -> "2.3.15",
@@ -69,17 +69,17 @@ sparkVersion in ThisBuild := sys.props.getOrElse("spark.version", "1.6.3")
 
 akkaVersion in ThisBuild := sys.props.getOrElse(
   "akka.version",
-  scalaSparkDependenciesVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("akka"))
+  scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("akka"))
 
 lazy val es = sys.props.getOrElse("elasticsearch.version", "1.7.6")
 
 elasticsearchVersion in ThisBuild := es
 
-json4sVersion in ThisBuild := scalaSparkDependenciesVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("json4s")
+json4sVersion in ThisBuild := scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("json4s")
 
 hadoopVersion in ThisBuild := sys.props.getOrElse(
   "hadoop.version",
-  scalaSparkDependenciesVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("hadoop"))
+  scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("hadoop"))
 
 val pioBuildInfoSettings = buildInfoSettings ++ Seq(
   sourceGenerators in Compile <+= buildInfo,
@@ -97,32 +97,11 @@ val genjavadocSettings: Seq[sbt.Def.Setting[_]] = Seq(
   libraryDependencies += compilerPlugin("com.typesafe.genjavadoc" %% "genjavadoc-plugin" % "0.10" cross CrossVersion.full),
     scalacOptions <+= target map (t => "-P:genjavadoc:out=" + (t / "java")))
 
-// Paths specified below are required for the tests, since thread pools initialized
-// in unit tests of data subproject are used later in spark jobs executed in core.
-// They need to have properly configured classloaders to load core classes for spark
-// in subsequent tests.
-def coreClasses(baseDirectory: java.io.File, scalaVersion: String): Seq[File] = Seq(
-  baseDirectory / s"../core/target/scala-${versionPrefix(scalaVersion)}/classes",
-  baseDirectory / s"../core/target/scala-${versionPrefix(scalaVersion)}/test-classes")
-
 val conf = file("conf")
 
 val commonSettings = Seq(
   autoAPIMappings := true,
   unmanagedClasspath in Test += conf)
-
-val common = (project in file("common")).
-  settings(commonSettings: _*).
-  settings(genjavadocSettings: _*).
-  disablePlugins(sbtassembly.AssemblyPlugin)
-
-val data = (project in file("data")).
-  dependsOn(common).
-  settings(commonSettings: _*).
-  settings(genjavadocSettings: _*).
-  settings(unmanagedSourceDirectories in Compile +=
-    sourceDirectory.value / s"main/spark-${versionMajor(sparkVersion.value)}").
-  disablePlugins(sbtassembly.AssemblyPlugin)
 
 val dataElasticsearch1 = (project in file("storage/elasticsearch1")).
   settings(commonSettings: _*).
@@ -154,8 +133,23 @@ val dataLocalfs = (project in file("storage/localfs")).
   settings(genjavadocSettings: _*).
   settings(publishArtifact := false)
 
+val common = (project in file("common")).
+  settings(commonSettings: _*).
+  settings(genjavadocSettings: _*).
+  disablePlugins(sbtassembly.AssemblyPlugin)
+
+val data = (project in file("data")).
+  dependsOn(common).
+  dependsOn(dataJdbc % "test->compile").
+  settings(commonSettings: _*).
+  settings(genjavadocSettings: _*).
+  settings(unmanagedSourceDirectories in Compile +=
+    sourceDirectory.value / s"main/spark-${versionMajor(sparkVersion.value)}").
+  disablePlugins(sbtassembly.AssemblyPlugin)
+
 val core = (project in file("core")).
   dependsOn(data).
+  dependsOn(dataJdbc % "test->compile").
   settings(commonSettings: _*).
   settings(genjavadocSettings: _*).
   settings(pioBuildInfoSettings: _*).
@@ -165,16 +159,15 @@ val core = (project in file("core")).
 val tools = (project in file("tools")).
   dependsOn(core).
   dependsOn(data).
+  dependsOn(dataJdbc % "test->compile").
   settings(commonSettings: _*).
   settings(genjavadocSettings: _*).
   enablePlugins(SbtTwirl).
-  settings(fullClasspath in Test ++= coreClasses(baseDirectory.value, scalaVersion.value)).
   settings(publishArtifact := false)
 
 val e2 = (project in file("e2")).
   settings(commonSettings: _*).
   settings(genjavadocSettings: _*).
-  settings(fullClasspath in Test ++= coreClasses(baseDirectory.value, scalaVersion.value)).
   disablePlugins(sbtassembly.AssemblyPlugin)
 
 val dataEs = if (versionMajor(es) == 1) dataElasticsearch1 else dataElasticsearch

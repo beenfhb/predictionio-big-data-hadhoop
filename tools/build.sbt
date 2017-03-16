@@ -36,6 +36,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"      %% "akka-actor"     % akkaVersion.value,
   "com.typesafe.akka"      %% "akka-slf4j"     % akkaVersion.value,
   "io.spray"               %% "spray-testkit"  % "1.3.3" % "test",
+  "org.postgresql"          % "postgresql"     % "9.4-1204-jdbc41" % "test",
   "org.specs2"             %% "specs2"         % "2.3.13" % "test")
 
 dependencyOverrides +=   "org.slf4j" % "slf4j-log4j12" % "1.7.18"

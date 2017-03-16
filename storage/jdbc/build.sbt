@@ -23,8 +23,8 @@ libraryDependencies ++= Seq(
   "org.apache.predictionio" %% "apache-predictionio-core" % version.value % "provided",
   "org.apache.predictionio" %% "apache-predictionio-data" % version.value % "provided",
   "org.apache.spark"        %% "spark-sql"      % sparkVersion.value % "provided",
-  "org.postgresql"           % "postgresql"     % "9.4-1204-jdbc41",
   "org.scalikejdbc"         %% "scalikejdbc"    % "2.3.5",
+  "org.postgresql"           % "postgresql"     % "9.4-1204-jdbc41" % "test",
   "org.scalatest"           %% "scalatest"      % "2.1.7" % "test",
   "org.specs2"              %% "specs2"         % "2.3.13" % "test")
 

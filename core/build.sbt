@@ -37,8 +37,9 @@ libraryDependencies ++= Seq(
   "org.json4s"             %% "json4s-native"    % json4sVersion.value,
   "org.json4s"             %% "json4s-ext"       % json4sVersion.value,
   "org.scalaj"             %% "scalaj-http"      % "1.1.6",
-  "org.scalatest"          %% "scalatest"        % "2.1.7" % "test",
   "org.slf4j"               % "slf4j-log4j12"    % "1.7.18",
+  "org.postgresql"          % "postgresql"       % "9.4-1204-jdbc41" % "test",
+  "org.scalatest"          %% "scalatest"        % "2.1.7" % "test",
   "org.specs2"             %% "specs2"           % "2.3.13" % "test")
 
 parallelExecution in Test := false
