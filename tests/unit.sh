@@ -25,11 +25,20 @@ pushd /PredictionIO
 set -a
 source ./conf/pio-env.sh
 set +a
+source ./conf/pio-vendors.sh
 
 # Run stylecheck
-sbt/sbt -Dbuild.profile=$1 scalastyle
+sbt/sbt scalastyle \
+    -Dscala.version=$PIO_SCALA_VERSION \
+    -Dspark.version=$PIO_SPARK_VERSION \
+    -Dhadoop.version=$PIO_HADOOP_VERSION \
+    -Delasticsearch.version=$PIO_ELASTICSEARCH_VERSION
 
 # Run all unit tests
-sbt/sbt -Dbuild.profile=$1 test
+sbt/sbt test \
+    -Dscala.version=$PIO_SCALA_VERSION \
+    -Dspark.version=$PIO_SPARK_VERSION \
+    -Dhadoop.version=$PIO_HADOOP_VERSION \
+    -Delasticsearch.version=$PIO_ELASTICSEARCH_VERSION
 
 popd

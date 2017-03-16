@@ -22,7 +22,6 @@ docker pull predictionio/pio-testing-base
 
 pushd $DIR/..
 
-source conf/set_build_profile.sh ${BUILD_PROFILE}
 source conf/pio-vendors.sh
 if [ ! -f $DIR/docker-files/${PGSQL_JAR} ]; then
   wget $PGSQL_DOWNLOAD
@@ -33,36 +32,23 @@ if [ ! -f $DIR/docker-files/${SPARK_ARCHIVE} ]; then
   mv $SPARK_ARCHIVE $DIR/docker-files/
 fi
 
-if [ -z "$ES_VERSION" ]; then
-  ./make-distribution.sh -Dbuild.profile=${BUILD_PROFILE}
-else
-  ./make-distribution.sh --with-es=$ES_VERSION -Dbuild.profile=${BUILD_PROFILE}
-fi
+./make-distribution.sh \
+    -Dscala.version=$PIO_SCALA_VERSION \
+    -Dspark.version=$PIO_SPARK_VERSION \
+    -Dhadoop.version=$PIO_HADOOP_VERSION \
+    -Delasticsearch.version=$PIO_ELASTICSEARCH_VERSION
 sbt/sbt clean
 mkdir assembly
 cp dist/lib/*.jar assembly/
 mkdir -p lib/spark
-if [ -e dist/lib/spark/*.jar ]; then
-  cp dist/lib/spark/*.jar lib/spark
-fi
+cp dist/lib/spark/*.jar lib/spark
 rm *.tar.gz
 docker build -t predictionio/pio .
 popd
 
-if [ "$ES_VERSION" = "1" ]; then
-    docker build -t predictionio/pio-testing-es1 -f $DIR/Dockerfile-es1 $DIR \
-      --build-arg SPARK_ARCHIVE=$SPARK_ARCHIVE \
-      --build-arg SPARK_DIR=$SPARK_DIR \
-      --build-arg PGSQL_JAR=$PGSQL_JAR \
-      --build-arg BUILD_PROFILE=$BUILD_PROFILE \
-      --build-arg PIO_SCALA_VERSION=$PIO_SCALA_VERSION \
-      --build-arg PIO_SPARK_VERSION=$PIO_SPARK_VERSION
-else
-    docker build -t predictionio/pio-testing $DIR \
-      --build-arg SPARK_ARCHIVE=$SPARK_ARCHIVE \
-      --build-arg SPARK_DIR=$SPARK_DIR \
-      --build-arg PGSQL_JAR=$PGSQL_JAR \
-      --build-arg BUILD_PROFILE=$BUILD_PROFILE \
-      --build-arg PIO_SCALA_VERSION=$PIO_SCALA_VERSION \
-      --build-arg PIO_SPARK_VERSION=$PIO_SPARK_VERSION
-fi
+docker build -t predictionio/pio-testing $DIR \
+  --build-arg SPARK_ARCHIVE=$SPARK_ARCHIVE \
+  --build-arg SPARK_DIR=$SPARK_DIR \
+  --build-arg PGSQL_JAR=$PGSQL_JAR \
+  --build-arg PIO_SCALA_VERSION=$PIO_SCALA_VERSION \
+  --build-arg PIO_SPARK_VERSION=$PIO_SPARK_VERSION

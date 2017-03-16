@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import PIOBuild._
+
 name := "apache-predictionio-data-elasticsearch1"
 
 elasticsearchVersion := "1.7.3"

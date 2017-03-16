@@ -21,15 +21,12 @@ set -e
 
 usage ()
 {
-    echo "Usage: $0 [-h|--help] [--with-es=x]"
+    echo "Usage: $0 [-h|--help]"
     echo ""
     echo "  -h|--help    Show usage"
-    echo ""
-    echo "  --with-es=1  Build distribution with Elasticsearch 1 support as default"
-    echo "  --with-es=5  Build distribution with Elasticsearch 5 support as default"
 }
 
-ES_VERSION=1
+JAVA_PROPS=()
 
 for i in "$@"
 do
@@ -39,11 +36,8 @@ case $i in
     shift
     exit
     ;;
-    --with-es=*)
-    ES_VERSION="${i#*=}"
-    shift
-    ;;
     -D*)
+    JAVA_PROPS+=("$i")
     shift
     ;;
     *)
@@ -53,14 +47,6 @@ case $i in
 esac
 done
 
-if [ "$ES_VERSION" = "1" ] || [ "$ES_VERSION" = "5" ]
-then
-    echo -e "\033[0;32mBuilding with Elasticsearch $ES_VERSION support as the default choice\033[0m"
-else
-    usage
-    exit 1
-fi
-
 FWDIR="$(cd `dirname $0`; pwd)"
 DISTDIR="${FWDIR}/dist"
 
@@ -68,10 +54,10 @@ VERSION=$(grep ^version ${FWDIR}/build.sbt | grep ThisBuild | grep -o '".*"' | s
 
 echo "Building binary distribution for PredictionIO $VERSION..."
 
+sbt/sbt printBuildInfo
+
 cd ${FWDIR}
-sbt/sbt "$@" common/publishLocal data/publishLocal core/publishLocal e2/publishLocal \
-dataElasticsearch1/assembly dataElasticsearch/assembly dataHbase/assembly dataHdfs/assembly \
-dataJdbc/assembly dataLocalfs/assembly tools/assembly
+sbt/sbt "$JAVA_PROPS" publishLocal assembly
 
 cd ${FWDIR}
 rm -rf ${DISTDIR}
@@ -79,8 +65,8 @@ mkdir -p ${DISTDIR}/bin
 mkdir -p ${DISTDIR}/conf
 mkdir -p ${DISTDIR}/lib
 mkdir -p ${DISTDIR}/lib/spark
-mkdir -p ${DISTDIR}/lib/extra
 mkdir -p ${DISTDIR}/project
+
 mkdir -p ${DISTDIR}/sbt
 
 cp ${FWDIR}/bin/* ${DISTDIR}/bin || :
@@ -89,13 +75,6 @@ cp ${FWDIR}/project/build.properties ${DISTDIR}/project
 cp ${FWDIR}/sbt/sbt ${DISTDIR}/sbt
 cp ${FWDIR}/assembly/*assembly*jar ${DISTDIR}/lib
 cp ${FWDIR}/assembly/spark/*jar ${DISTDIR}/lib/spark
-
-if [ "$ES_VERSION" = "5" ]
-then
-    mv ${DISTDIR}/lib/spark/pio-data-elasticsearch1-assembly-*.jar ${DISTDIR}/lib/extra
-else
-    mv ${DISTDIR}/lib/spark/pio-data-elasticsearch-assembly-*.jar ${DISTDIR}/lib/extra
-fi
 
 rm -f ${DISTDIR}/lib/*javadoc.jar
 rm -f ${DISTDIR}/lib/*sources.jar

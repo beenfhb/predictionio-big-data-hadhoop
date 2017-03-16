@@ -19,6 +19,32 @@
 # IMPORTANT: PIO_*_VERSION for dependencies must be set before envoking this script.
 # `source conf/set_build_profile.sh $BUILD_PROFILE` to get the proper versions
 
+if [ -z "$PIO_SCALA_VERSION" ]; then
+    PIO_SCALA_VERSION="2.10.6"
+fi
+
+if [ -z "$PIO_SPARK_VERSION" ]; then
+    PIO_SPARK_VERSION="1.6.3"
+fi
+
+if [ -z "$PIO_HADOOP_VERSION" ]; then
+    PIO_HADOOP_VERSION="2.6.5"
+fi
+
+if [ -z "$PIO_ELASTICSEARCH_VERSION" ]; then
+    PIO_ELASTICSEARCH_VERSION="1.7.3"
+fi
+
+ES_MAJOR=`echo $PIO_ELASTICSEARCH_VERSION | awk -F. '{print $1}'`
+
+if [ "$ES_MAJOR" = "1" ]; then
+    export ES_IMAGE="elasticsearch"
+    export ES_TAG="1"
+else
+    export ES_IMAGE="docker.elastic.co/elasticsearch/elasticsearch"
+    export ES_TAG="5.2.2"
+fi
+
 PGSQL_JAR=postgresql-9.4-1204.jdbc41.jar
 PGSQL_DOWNLOAD=https://jdbc.postgresql.org/download/${PGSQL_JAR}
 

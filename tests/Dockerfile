@@ -20,13 +20,15 @@ FROM predictionio/pio
 ARG SPARK_ARCHIVE
 ARG SPARK_DIR
 ARG PGSQL_JAR
-ARG BUILD_PROFILE
 ARG PIO_SCALA_VERSION
 ARG PIO_SPARK_VERSION
+ARG PIO_ELASTICSEARCH_VERSION
 
-ENV BUILD_PROFILE=$BUILD_PROFILE
 ENV PIO_SCALA_VERSION=$PIO_SCALA_VERSION
 ENV PIO_SPARK_VERSION=$PIO_SPARK_VERSION
+ENV PIO_ELASTICSEARCH_VERSION=$PIO_ELASTICSEARCH_VERSION
+
+ENV PGSQL_JAR=$PGSQL_JAR
 
 # WORKAROUND: es-hadoop stops on RDD#take(1)
 ADD docker-files/${SPARK_ARCHIVE} /vendors
@@ -35,7 +37,6 @@ ENV SPARK_HOME /vendors/${SPARK_DIR}
 
 COPY docker-files/${PGSQL_JAR} /drivers/${PGSQL_JAR}
 COPY docker-files/init.sh init.sh
-COPY docker-files/set_build_profile.sh set_build_profile.sh
 COPY docker-files/env-conf/hbase-site.xml ${PIO_HOME}/conf/hbase-site.xml
 COPY docker-files/env-conf/pio-env.sh ${PIO_HOME}/conf/pio-env.sh
 COPY docker-files/pgpass /root/.pgpass

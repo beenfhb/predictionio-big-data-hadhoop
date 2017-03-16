@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import PIOBuild._
 import sbtassembly.AssemblyPlugin.autoImport._
 
 name := "apache-predictionio-tools"
