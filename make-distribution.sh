@@ -57,7 +57,8 @@ echo "Building binary distribution for PredictionIO $VERSION..."
 sbt/sbt printBuildInfo
 
 cd ${FWDIR}
-sbt/sbt "$JAVA_PROPS" publishLocal assembly
+sbt/sbt "$JAVA_PROPS" publishLocal
+sbt/sbt "$JAVA_PROPS" assembly
 
 cd ${FWDIR}
 rm -rf ${DISTDIR}
