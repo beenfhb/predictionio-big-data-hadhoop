@@ -55,9 +55,11 @@ VERSION=$(grep ^version ${FWDIR}/build.sbt | grep ThisBuild | grep -o '".*"' | s
 echo "Building binary distribution for PredictionIO $VERSION..."
 
 cd ${FWDIR}
-sbt/sbt clean
-sbt/sbt "$JAVA_PROPS" printBuildInfo
-sbt/sbt "$JAVA_PROPS" publishLocal assembly storage/assembly
+set -x
+sbt/sbt "${JAVA_PROPS[@]}" clean
+sbt/sbt "${JAVA_PROPS[@]}" printBuildInfo
+sbt/sbt "${JAVA_PROPS[@]}" publishLocal assembly storage/assembly
+set +x
 
 cd ${FWDIR}
 rm -rf ${DISTDIR}

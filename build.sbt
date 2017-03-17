@@ -185,7 +185,9 @@ val storageSubprojects = Seq(
     dataJdbc,
     dataLocalfs)
 
-val storage = (project in file("storage")).aggregate(storageSubprojects map Project.projectToRef: _*)
+val storage = (project in file("storage"))
+  .aggregate(storageSubprojects map Project.projectToRef: _*)
+  .disablePlugins(sbtassembly.AssemblyPlugin)
 
 val root = (project in file(".")).
   settings(commonSettings: _*).
