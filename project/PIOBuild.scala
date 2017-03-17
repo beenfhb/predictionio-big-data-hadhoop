@@ -21,13 +21,16 @@ object PIOBuild {
   val elasticsearchVersion = settingKey[String]("The version of Elasticsearch used for building")
   val json4sVersion = settingKey[String]("The version of JSON4S used for building")
   val sparkVersion = settingKey[String]("The version of Apache Spark used for building")
+  val sparkBinaryVersion = settingKey[String]("The binary version of Apache Spark used for building")
   val hadoopVersion = settingKey[String]("The version of Apache Hadoop used for building")
   val akkaVersion = settingKey[String]("The version of Akka used for building")
-  val childrenPomExtra = settingKey[scala.xml.NodeSeq]("Extra POM data for children projects")
 
-  def versionPrefix(versionString: String): String = versionString.split('.').take(2).mkString(".")
-  def versionMajor(versionString: String): Int = versionString.split('.')(0).toInt
-  def versionMinor(versionString: String): Int = versionString.split('.')(1).toInt
+  val childrenPomExtra = settingKey[scala.xml.NodeSeq]("Extra POM data for children projects")
+  val elasticsearchSparkArtifact = settingKey[String]("Name of Elasticsearch-Spark artifact used for building")
+
+  def binaryVersion(versionString: String): String = versionString.split('.').take(2).mkString(".")
+  def majorVersion(versionString: String): Int = versionString.split('.')(0).toInt
+  def minorVersion(versionString: String): Int = versionString.split('.')(1).toInt
 
   lazy val printBuildInfo = taskKey[Unit]("Print build information")
 }

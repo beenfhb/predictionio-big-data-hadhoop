@@ -22,22 +22,12 @@ name := "apache-predictionio-data"
 libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time"    % "2.6.0",
   "com.google.guava"        % "guava"          % "19.0",
-  "commons-codec"           % "commons-codec"  % "1.9",
   "io.spray"               %% "spray-can"      % "1.3.3",
   "io.spray"               %% "spray-routing"  % "1.3.3",
-  "org.apache.hadoop"       % "hadoop-common"  % hadoopVersion.value
-    exclude("javax.servlet", "servlet-api"),
-  "org.apache.zookeeper"    % "zookeeper"      % "3.4.7"
-    exclude("org.slf4j", "slf4j-api")
-    exclude("org.slf4j", "slf4j-log4j12"),
-  "org.apache.spark"       %% "spark-core"     % sparkVersion.value % "provided",
   "org.apache.spark"       %% "spark-sql"      % sparkVersion.value % "provided",
   "org.clapper"            %% "grizzled-slf4j" % "1.0.2",
   "org.json4s"             %% "json4s-native"  % json4sVersion.value,
-  "org.json4s"             %% "json4s-ext"     % json4sVersion.value,
-  "org.slf4j"               % "slf4j-log4j12"  % "1.7.18",
   "org.scalikejdbc"        %% "scalikejdbc"    % "2.3.2",
-  "com.typesafe.akka"      %% "akka-actor"     % akkaVersion.value,
   "io.spray"               %% "spray-testkit"  % "1.3.3" % "test",
   "org.scalatest"          %% "scalatest"      % "2.1.7" % "test",
   "org.specs2"             %% "specs2"         % "2.3.13" % "test")

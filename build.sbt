@@ -67,19 +67,21 @@ javacOptions in (ThisBuild, compile) ++= Seq("-source", "1.7", "-target", "1.7",
 // Ignore differentiation of Spark patch levels
 sparkVersion in ThisBuild := sys.props.getOrElse("spark.version", "1.6.3")
 
+sparkBinaryVersion in ThisBuild := binaryVersion(sparkVersion.value)
+
 akkaVersion in ThisBuild := sys.props.getOrElse(
   "akka.version",
-  scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("akka"))
+  scalaSparkDepsVersion(scalaBinaryVersion.value)(sparkBinaryVersion.value)("akka"))
 
 lazy val es = sys.props.getOrElse("elasticsearch.version", "1.7.6")
 
 elasticsearchVersion in ThisBuild := es
 
-json4sVersion in ThisBuild := scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("json4s")
+json4sVersion in ThisBuild := scalaSparkDepsVersion(scalaBinaryVersion.value)(sparkBinaryVersion.value)("json4s")
 
 hadoopVersion in ThisBuild := sys.props.getOrElse(
   "hadoop.version",
-  scalaSparkDepsVersion(versionPrefix(scalaVersion.value))(versionPrefix(sparkVersion.value))("hadoop"))
+  scalaSparkDepsVersion(scalaBinaryVersion.value)(sparkBinaryVersion.value)("hadoop"))
 
 val pioBuildInfoSettings = buildInfoSettings ++ Seq(
   sourceGenerators in Compile <+= buildInfo,
@@ -102,7 +104,7 @@ val conf = file("conf")
 val commonSettings = Seq(
   autoAPIMappings := true,
   unmanagedClasspath in Test += conf,
-  unmanagedClasspath in Test += baseDirectory.value / s"../storage/jdbc/target/scala-${versionPrefix(scalaVersion.value)}/classes")
+  unmanagedClasspath in Test += baseDirectory.value.getParentFile / s"storage/jdbc/target/scala-${scalaBinaryVersion.value}/classes")
 
 val commonTestSettings = Seq(
   libraryDependencies ++= Seq(
@@ -150,7 +152,7 @@ val data = (project in file("data")).
   settings(commonTestSettings: _*).
   settings(genjavadocSettings: _*).
   settings(unmanagedSourceDirectories in Compile +=
-    sourceDirectory.value / s"main/spark-${versionMajor(sparkVersion.value)}").
+    sourceDirectory.value / s"main/spark-${majorVersion(sparkVersion.value)}").
   disablePlugins(sbtassembly.AssemblyPlugin)
 
 val core = (project in file("core")).
@@ -176,7 +178,7 @@ val e2 = (project in file("e2")).
   settings(genjavadocSettings: _*).
   disablePlugins(sbtassembly.AssemblyPlugin)
 
-val dataEs = if (versionMajor(es) == 1) dataElasticsearch1 else dataElasticsearch
+val dataEs = if (majorVersion(es) == 1) dataElasticsearch1 else dataElasticsearch
 
 val storageSubprojects = Seq(
     dataEs,

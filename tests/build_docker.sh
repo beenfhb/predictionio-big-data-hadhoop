@@ -37,9 +37,11 @@ fi
     -Dspark.version=$PIO_SPARK_VERSION \
     -Dhadoop.version=$PIO_HADOOP_VERSION \
     -Delasticsearch.version=$PIO_ELASTICSEARCH_VERSION
-sbt/sbt clean
+sbt/sbt clean storage/clean
+rm -rf assembly
 mkdir assembly
 cp dist/lib/*.jar assembly/
+rm -rf lib/spark
 mkdir -p lib/spark
 cp dist/lib/spark/*.jar lib/spark
 rm *.tar.gz
@@ -51,4 +53,5 @@ docker build -t predictionio/pio-testing $DIR \
   --build-arg SPARK_DIR=$SPARK_DIR \
   --build-arg PGSQL_JAR=$PGSQL_JAR \
   --build-arg PIO_SCALA_VERSION=$PIO_SCALA_VERSION \
-  --build-arg PIO_SPARK_VERSION=$PIO_SPARK_VERSION
+  --build-arg PIO_SPARK_VERSION=$PIO_SPARK_VERSION \
+  --build-arg PIO_ELASTICSEARCH_VERSION=$PIO_ELASTICSEARCH_VERSION

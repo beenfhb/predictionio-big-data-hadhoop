@@ -21,22 +21,10 @@ import sbtassembly.AssemblyPlugin.autoImport._
 name := "apache-predictionio-tools"
 
 libraryDependencies ++= Seq(
-  "com.github.scopt"       %% "scopt"          % "3.5.0",
-  "io.spray"               %% "spray-can"      % "1.3.3",
-  "io.spray"               %% "spray-routing"  % "1.3.3",
   "me.lessis"               % "semverfi_2.10"  % "0.1.3",
-  "org.apache.hadoop"       % "hadoop-common"  % hadoopVersion.value,
-  "org.apache.hadoop"       % "hadoop-hdfs"    % hadoopVersion.value,
-  "org.apache.spark"       %% "spark-core"     % sparkVersion.value % "provided",
   "org.apache.spark"       %% "spark-sql"      % sparkVersion.value % "provided",
-  "org.clapper"            %% "grizzled-slf4j" % "1.0.2",
-  "org.json4s"             %% "json4s-native"  % json4sVersion.value,
-  "org.json4s"             %% "json4s-ext"     % json4sVersion.value,
-  "org.scalaj"             %% "scalaj-http"    % "1.1.6",
-  "com.typesafe.akka"      %% "akka-actor"     % akkaVersion.value,
   "com.typesafe.akka"      %% "akka-slf4j"     % akkaVersion.value,
   "io.spray"               %% "spray-testkit"  % "1.3.3" % "test",
-  "org.postgresql"          % "postgresql"     % "9.4-1204-jdbc41" % "test",
   "org.specs2"             %% "specs2"         % "2.3.13" % "test")
 
 dependencyOverrides +=   "org.slf4j" % "slf4j-log4j12" % "1.7.18"
@@ -51,12 +39,8 @@ assemblyMergeStrategy in assembly := {
 
 excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
   cp filter { _.data.getName match {
-    case "asm-3.1.jar" => true
-    case "commons-beanutils-1.7.0.jar" => true
     case "reflectasm-1.10.1.jar" => true
-    case "commons-beanutils-core-1.8.0.jar" => true
     case "kryo-3.0.3.jar" => true
-    case "slf4j-log4j12-1.7.5.jar" => true
     case _ => false
   }}
 }
