@@ -101,7 +101,13 @@ val conf = file("conf")
 
 val commonSettings = Seq(
   autoAPIMappings := true,
-  unmanagedClasspath in Test += conf)
+  unmanagedClasspath in Test += conf,
+  unmanagedClasspath in Test += baseDirectory.value / s"../storage/jdbc/target/scala-${versionPrefix(scalaVersion.value)}/classes")
+
+val commonTestSettings = Seq(
+  libraryDependencies ++= Seq(
+    "org.postgresql"   % "postgresql"  % "9.4-1204-jdbc41" % "test",
+    "org.scalikejdbc" %% "scalikejdbc" % "2.3.5" % "test"))
 
 val dataElasticsearch1 = (project in file("storage/elasticsearch1")).
   settings(commonSettings: _*).
@@ -140,8 +146,8 @@ val common = (project in file("common")).
 
 val data = (project in file("data")).
   dependsOn(common).
-  dependsOn(dataJdbc % "test->compile").
   settings(commonSettings: _*).
+  settings(commonTestSettings: _*).
   settings(genjavadocSettings: _*).
   settings(unmanagedSourceDirectories in Compile +=
     sourceDirectory.value / s"main/spark-${versionMajor(sparkVersion.value)}").
@@ -149,8 +155,8 @@ val data = (project in file("data")).
 
 val core = (project in file("core")).
   dependsOn(data).
-  dependsOn(dataJdbc % "test->compile").
   settings(commonSettings: _*).
+  settings(commonTestSettings: _*).
   settings(genjavadocSettings: _*).
   settings(pioBuildInfoSettings: _*).
   enablePlugins(SbtTwirl).
@@ -159,8 +165,8 @@ val core = (project in file("core")).
 val tools = (project in file("tools")).
   dependsOn(core).
   dependsOn(data).
-  dependsOn(dataJdbc % "test->compile").
   settings(commonSettings: _*).
+  settings(commonTestSettings: _*).
   settings(genjavadocSettings: _*).
   enablePlugins(SbtTwirl).
   settings(publishArtifact := false)
@@ -172,17 +178,14 @@ val e2 = (project in file("e2")).
 
 val dataEs = if (versionMajor(es) == 1) dataElasticsearch1 else dataElasticsearch
 
-val subprojects = Seq(
-    common,
-    core,
-    data,
+val storageSubprojects = Seq(
     dataEs,
     dataHbase,
     dataHdfs,
     dataJdbc,
-    dataLocalfs,
-    tools,
-    e2)
+    dataLocalfs)
+
+val storage = (project in file("storage")).aggregate(storageSubprojects map Project.projectToRef: _*)
 
 val root = (project in file(".")).
   settings(commonSettings: _*).
@@ -241,7 +244,7 @@ val root = (project in file(".")).
       "docs/javadoc/javadoc-overview.html",
       "-noqualifier",
       "java.lang")).
-  aggregate(subprojects map Project.projectToRef: _*).
+  aggregate(common, core, data, tools, e2).
   disablePlugins(sbtassembly.AssemblyPlugin)
 
 val pioUnidoc = taskKey[Unit]("Builds PredictionIO ScalaDoc")

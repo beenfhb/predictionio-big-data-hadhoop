@@ -25,8 +25,6 @@ libraryDependencies ++= Seq(
   "commons-codec"           % "commons-codec"  % "1.9",
   "io.spray"               %% "spray-can"      % "1.3.3",
   "io.spray"               %% "spray-routing"  % "1.3.3",
-  "io.spray"               %% "spray-testkit"  % "1.3.3" % "test",
-  "mysql"                   % "mysql-connector-java" % "5.1.37" % "optional",
   "org.apache.hadoop"       % "hadoop-common"  % hadoopVersion.value
     exclude("javax.servlet", "servlet-api"),
   "org.apache.zookeeper"    % "zookeeper"      % "3.4.7"
@@ -37,11 +35,11 @@ libraryDependencies ++= Seq(
   "org.clapper"            %% "grizzled-slf4j" % "1.0.2",
   "org.json4s"             %% "json4s-native"  % json4sVersion.value,
   "org.json4s"             %% "json4s-ext"     % json4sVersion.value,
-  "org.scalatest"          %% "scalatest"      % "2.1.7" % "test",
   "org.slf4j"               % "slf4j-log4j12"  % "1.7.18",
-  "org.postgresql"          % "postgresql"     % "9.4.1209",
   "org.scalikejdbc"        %% "scalikejdbc"    % "2.3.2",
   "com.typesafe.akka"      %% "akka-actor"     % akkaVersion.value,
+  "io.spray"               %% "spray-testkit"  % "1.3.3" % "test",
+  "org.scalatest"          %% "scalatest"      % "2.1.7" % "test",
   "org.specs2"             %% "specs2"         % "2.3.13" % "test")
 
 parallelExecution in Test := false

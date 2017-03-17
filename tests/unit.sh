@@ -35,7 +35,7 @@ sbt/sbt scalastyle \
     -Delasticsearch.version=$PIO_ELASTICSEARCH_VERSION
 
 # Run all unit tests
-sbt/sbt test \
+sbt/sbt test storage/test \
     -Dscala.version=$PIO_SCALA_VERSION \
     -Dspark.version=$PIO_SPARK_VERSION \
     -Dhadoop.version=$PIO_HADOOP_VERSION \
